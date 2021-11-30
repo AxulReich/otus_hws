@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"strings"
 	"unicode"
 )
 
@@ -17,7 +16,6 @@ func Unpack(inStr string) (string, error) {
 		metShieldingChar bool
 		inStrRuned       = []rune(inStr)
 
-		result     strings.Builder
 		resultRune = make([]rune, 0, 2*cap(inStrRuned))
 	)
 
@@ -25,7 +23,6 @@ func Unpack(inStr string) (string, error) {
 		if unicode.IsDigit(r) {
 			if (idx > 1 && (inStrRuned[idx-2] == shieldingChar)) || (idx > 0 && !unicode.IsDigit(inStrRuned[idx-1])) {
 				if metShieldingChar {
-					result.WriteRune(r)
 					resultRune = append(resultRune, r)
 					metShieldingChar = false
 
@@ -34,9 +31,10 @@ func Unpack(inStr string) (string, error) {
 					if err != nil {
 						return "", fmt.Errorf("error while Atoi: %w", err)
 					}
+					curIdxInResult := len(resultRune)-1
 
 					if rInt == 0 {
-						resultRune = resultRune[:idx-1]
+						resultRune = resultRune[:curIdxInResult]
 						continue
 					}
 
@@ -44,7 +42,8 @@ func Unpack(inStr string) (string, error) {
 						continue
 					}
 
-					runeToCopy := resultRune[len(resultRune)-1]
+					runeToCopy := resultRune[curIdxInResult]
+
 					for i := 0; i < rInt-1; i++ {
 						resultRune = append(resultRune, runeToCopy)
 					}
