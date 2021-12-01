@@ -9,15 +9,14 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-
 // Unpack checking & building in same loop
 func Unpack(inStr string) (string, error) {
 	const shieldingChar rune = 92 // stands for '/' character
 	var (
 		metShieldingChar bool
 		inStrRuned       = []rune(inStr)
-		multiplied bool
-		resultRune = make([]rune, 0, 2*cap(inStrRuned))
+		multiplied       bool
+		resultRune       = make([]rune, 0, 2*cap(inStrRuned))
 	)
 
 	for idx, r := range inStrRuned {
@@ -35,7 +34,7 @@ func Unpack(inStr string) (string, error) {
 				if err != nil {
 					return "", fmt.Errorf("error while Atoi: %w", err)
 				}
-				curIdxInResult := len(resultRune)-1
+				curIdxInResult := len(resultRune) - 1
 
 				if rInt == 0 {
 					resultRune = resultRune[:curIdxInResult]

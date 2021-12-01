@@ -2,7 +2,6 @@ package hw02unpackstring
 
 import (
 	"errors"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,7 +18,10 @@ func TestUnpack(t *testing.T) {
 		{input: "aaa0b", expected: "aab"},
 		{input: " ", expected: " "},
 		{input: " 2", expected: "  "},
+		{input: " 0", expected: ""},
 		{input: "s0", expected: ""},
+		{input: "\n3", expected: "\n\n\n"},
+		{input: "d\n5abc", expected: "d\n\n\n\n\nabc"},
 
 		{input: `qwe\4\5`, expected: `qwe45`},
 		{input: `qwe\45`, expected: `qwe44444`},
@@ -41,10 +43,10 @@ func TestUnpack(t *testing.T) {
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b", `\s4`, `\`, `qwe\\\`, `w\e3`, `\444`}
+	invalidStrings := []string{"3abc", "45", "aaa10b", `\s4`, `\`, `qwe\\\`, `w\e3`, `\444`, `3`, `qw\ne\`}
 	for _, tc := range invalidStrings {
 		tc := tc
-		t.Run(fmt.Sprintf("Unpack: %v", tc), func(t *testing.T) {
+		t.Run(tc, func(t *testing.T) {
 			_, err := Unpack(tc)
 			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
