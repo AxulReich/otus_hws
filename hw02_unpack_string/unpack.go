@@ -1,3 +1,4 @@
+//nolint
 package hw02unpackstring
 
 import (
@@ -9,9 +10,9 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-// Unpack checking & building in same loop
+// Unpack checking & building in same loop.
 func Unpack(inStr string) (string, error) {
-	const shieldingChar rune = 92 // stands for '\' character
+	const shieldingChar rune = 92 // stands for '\' character.
 	var (
 		metShieldingChar bool
 		inStrRuned       = []rune(inStr)
@@ -35,10 +36,10 @@ func Unpack(inStr string) (string, error) {
 					return "", fmt.Errorf("error while Atoi err: %w", err)
 				}
 				curIdxInResult := len(resultRune) - 1
+				multiplied = true
 
 				if rInt == 0 {
 					resultRune = resultRune[:curIdxInResult]
-					multiplied = true
 					continue
 				}
 
@@ -47,8 +48,6 @@ func Unpack(inStr string) (string, error) {
 				for i := 0; i < rInt-1; i++ {
 					resultRune = append(resultRune, runeToCopy)
 				}
-				multiplied = true
-
 			} else {
 				return "", fmt.Errorf("digit at [0] position in string err: %w", ErrInvalidString)
 			}
