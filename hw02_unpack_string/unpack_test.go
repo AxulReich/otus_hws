@@ -2,6 +2,7 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -32,7 +33,7 @@ func TestUnpack(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.input, func(t *testing.T) {
-			result, err := Unpack(tc.input)
+			result, err := Un2pack(tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, result)
 		})
@@ -40,13 +41,17 @@ func TestUnpack(t *testing.T) {
 }
 
 func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b", `\s4`, `\`, `qwe\\\`}
+	invalidStrings := []string{"3abc", "45", "aaa10b", `\s4`, `\`, `qwe\\\`, `w\e3`, `\444`}
 	for _, tc := range invalidStrings {
 		tc := tc
-		t.Run(tc, func(t *testing.T) {
-			_, err := Unpack(tc)
+		t.Run(fmt.Sprintf("Unpack: %v", tc), func(t *testing.T) {
+			_, err := Un2pack(tc)
 			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
+		//t.Run(fmt.Sprintf("Un2pack: %v", tc), func(t *testing.T) {
+		//	_, err := Un2pack(tc)
+		//	require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+		//})
 	}
 }
 
