@@ -11,7 +11,7 @@ var ErrInvalidString = errors.New("invalid string")
 
 // Unpack checking & building in same loop
 func Unpack(inStr string) (string, error) {
-	const shieldingChar rune = 92 // stands for '/' character
+	const shieldingChar rune = 92 // stands for '\' character
 	var (
 		metShieldingChar bool
 		inStrRuned       = []rune(inStr)
@@ -28,11 +28,11 @@ func Unpack(inStr string) (string, error) {
 					continue
 				}
 				if multiplied {
-					return "", fmt.Errorf("digits in raw waithout \\: %w", ErrInvalidString)
+					return "", fmt.Errorf("digits in a row waithout \\ err: %w", ErrInvalidString)
 				}
 				rInt, err := strconv.Atoi(string(r))
 				if err != nil {
-					return "", fmt.Errorf("error while Atoi: %w", err)
+					return "", fmt.Errorf("error while Atoi err: %w", err)
 				}
 				curIdxInResult := len(resultRune) - 1
 
@@ -55,7 +55,7 @@ func Unpack(inStr string) (string, error) {
 				multiplied = true
 
 			} else {
-				return "", fmt.Errorf("digit at [0] position in string: %w", ErrInvalidString)
+				return "", fmt.Errorf("digit at [0] position in string err: %w", ErrInvalidString)
 			}
 		} else {
 			if r == shieldingChar {
@@ -66,7 +66,7 @@ func Unpack(inStr string) (string, error) {
 				metShieldingChar = false
 			}
 			if metShieldingChar {
-				return "", ErrInvalidString
+				return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
 			}
 			resultRune = append(resultRune, r)
 			multiplied = false
@@ -74,7 +74,7 @@ func Unpack(inStr string) (string, error) {
 	}
 
 	if metShieldingChar {
-		return "", fmt.Errorf("extra \\: %w", ErrInvalidString)
+		return "", fmt.Errorf("extra \\ err: %w", ErrInvalidString)
 	}
 	return string(resultRune), nil
 }
