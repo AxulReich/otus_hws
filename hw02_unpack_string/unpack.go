@@ -42,11 +42,6 @@ func Unpack(inStr string) (string, error) {
 					continue
 				}
 
-				if rInt == 1 {
-					multiplied = true
-					continue
-				}
-
 				runeToCopy := resultRune[curIdxInResult]
 
 				for i := 0; i < rInt-1; i++ {
