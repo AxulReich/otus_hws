@@ -33,7 +33,7 @@ func TestUnpack(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.input, func(t *testing.T) {
-			result, err := Un2pack(tc.input)
+			result, err := Unpack(tc.input)
 			require.NoError(t, err)
 			require.Equal(t, tc.expected, result)
 		})
@@ -45,31 +45,8 @@ func TestUnpackInvalidString(t *testing.T) {
 	for _, tc := range invalidStrings {
 		tc := tc
 		t.Run(fmt.Sprintf("Unpack: %v", tc), func(t *testing.T) {
-			_, err := Un2pack(tc)
+			_, err := Unpack(tc)
 			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
-		})
-		//t.Run(fmt.Sprintf("Un2pack: %v", tc), func(t *testing.T) {
-		//	_, err := Un2pack(tc)
-		//	require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
-		//})
-	}
-}
-
-func Test_main(t *testing.T) {
-	tests := []struct {
-		input    string
-		expected string
-	}{
-		{input: `\s4`, expected: "aaaabccddddde"},
-	}
-
-	for _, tc := range tests {
-		tc := tc
-		t.Run(tc.input, func(t *testing.T) {
-			result, err := Unpack(tc.input)
-			t.Log(err)
-			t.Log(result)
-
 		})
 	}
 }
