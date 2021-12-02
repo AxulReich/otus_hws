@@ -1,4 +1,3 @@
-//nolint
 package hw02unpackstring
 
 import (
@@ -22,14 +21,11 @@ func Unpack(inStr string) (string, error) {
 
 	for idx, r := range inStrRuned {
 		if unicode.IsDigit(r) {
-			if idx > 0 {
+			if idx > 0 && !multiplied {
 				if metShieldingChar {
 					resultRune = append(resultRune, r)
 					metShieldingChar = false
 					continue
-				}
-				if multiplied {
-					return "", fmt.Errorf("digits in a row waithout \\ err: %w", ErrInvalidString)
 				}
 				rInt, err := strconv.Atoi(string(r))
 				if err != nil {
@@ -44,31 +40,31 @@ func Unpack(inStr string) (string, error) {
 				}
 
 				runeToCopy := resultRune[curIdxInResult]
-
 				for i := 0; i < rInt-1; i++ {
 					resultRune = append(resultRune, runeToCopy)
 				}
-			} else {
-				return "", fmt.Errorf("digit at [0] position in string err: %w", ErrInvalidString)
+				continue
 			}
-		} else {
-			if r == shieldingChar {
-				if !metShieldingChar {
-					metShieldingChar = true
-					continue
-				}
-				metShieldingChar = false
-			}
-			if metShieldingChar {
-				return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
-			}
-			resultRune = append(resultRune, r)
-			multiplied = false
+			return "", fmt.Errorf("digit at [0] position in string or in a row waithout \\ err: %w", ErrInvalidString)
 		}
+
+		if r == shieldingChar {
+			if !metShieldingChar {
+				metShieldingChar = true
+				continue
+			}
+			metShieldingChar = false
+		}
+		if metShieldingChar {
+			return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
+		}
+		resultRune = append(resultRune, r)
+		multiplied = false
 	}
 
 	if metShieldingChar {
 		return "", fmt.Errorf("extra \\ err: %w", ErrInvalidString)
 	}
+
 	return string(resultRune), nil
 }

@@ -23,6 +23,8 @@ func TestUnpack(t *testing.T) {
 		{input: "\n3", expected: "\n\n\n"},
 		{input: "d\n5abc", expected: "d\n\n\n\n\nabc"},
 
+		{input: `a-4b`, expected: `a----b`},
+		{input: `''2'a'`, expected: `''''a'`},
 		{input: `qwe\4\5`, expected: `qwe45`},
 		{input: `qwe\45`, expected: `qwe44444`},
 		{input: `qwe\\5`, expected: `qwe\\\\\`},
