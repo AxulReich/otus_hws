@@ -14,53 +14,50 @@ func Unpack(inStr string) (string, error) {
 	const shieldingChar rune = 92 // stands for '\' character.
 	var (
 		metShieldingChar bool
-		inStrRuned       = []rune(inStr)
 		multiplied       bool
-		resultRune       = make([]rune, 0, 2*cap(inStrRuned))
+		inStrRuned       = []rune(inStr)
+		resultRune       []rune
 	)
 
 	for idx, r := range inStrRuned {
+		var (
+			runeToAdd = r
+			mult      = 1
+		)
 		switch unicode.IsDigit(r) {
 		case true:
-			if idx > 0 && !multiplied {
-				if metShieldingChar {
-					resultRune = append(resultRune, r)
-					metShieldingChar = false
-					continue
-				}
-				rInt, err := strconv.Atoi(string(r))
-				if err != nil {
-					return "", fmt.Errorf("error while Atoi err: %w", err)
-				}
-				curIdxInResult := len(resultRune) - 1
-				multiplied = true
-
-				if rInt == 0 {
-					resultRune = resultRune[:curIdxInResult]
-					continue
-				}
-
-				runeToCopy := resultRune[curIdxInResult]
-				for i := 0; i < rInt-1; i++ {
-					resultRune = append(resultRune, runeToCopy)
-				}
-				continue
-			}
-			return "", fmt.Errorf("digit at [0] position in string or in a row waithout \\ err: %w", ErrInvalidString)
-		default:
-			if r == shieldingChar {
-				if !metShieldingChar {
-					metShieldingChar = true
-					continue
-				}
+			switch {
+			case metShieldingChar:
 				metShieldingChar = false
+			default:
+				if idx > 0 && !multiplied {
+					rInt, err := strconv.Atoi(string(r))
+					if err != nil {
+						return "", fmt.Errorf("error while Atoi err: %w", err)
+					}
+					multiplied = true
+
+					mult = rInt - 1
+					runeToAdd = resultRune[len(resultRune)-1]
+				} else {
+					return "", fmt.Errorf("digit at [0] position in string or digits in a row waithout \\ err: %w", ErrInvalidString)
+				}
+			}
+		default:
+			multiplied = false
+			if r == shieldingChar {
+				switch {
+				case metShieldingChar:
+					metShieldingChar = false
+				default:
+					metShieldingChar = true
+					mult = 0
+				}
 			} else if metShieldingChar {
 				return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
 			}
-
-			resultRune = append(resultRune, r)
-			multiplied = false
 		}
+		resultRune = add(resultRune, runeToAdd, mult)
 	}
 
 	if metShieldingChar {
@@ -68,4 +65,17 @@ func Unpack(inStr string) (string, error) {
 	}
 
 	return string(resultRune), nil
+}
+
+func add(target []rune, runeToCopy rune, n int) []rune {
+	switch {
+	case n < 0:
+		target = target[:len(target)-1]
+	case n > 0:
+		for i := 0; i < n; i++ {
+			target = append(target, runeToCopy)
+		}
+	default:
+	}
+	return target
 }
