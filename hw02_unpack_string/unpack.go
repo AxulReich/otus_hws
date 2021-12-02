@@ -20,7 +20,8 @@ func Unpack(inStr string) (string, error) {
 	)
 
 	for idx, r := range inStrRuned {
-		if unicode.IsDigit(r) {
+		switch unicode.IsDigit(r) {
+		case true:
 			if idx > 0 && !multiplied {
 				if metShieldingChar {
 					resultRune = append(resultRune, r)
@@ -46,20 +47,20 @@ func Unpack(inStr string) (string, error) {
 				continue
 			}
 			return "", fmt.Errorf("digit at [0] position in string or in a row waithout \\ err: %w", ErrInvalidString)
-		}
-
-		if r == shieldingChar {
-			if !metShieldingChar {
-				metShieldingChar = true
-				continue
+		default:
+			if r == shieldingChar {
+				if !metShieldingChar {
+					metShieldingChar = true
+					continue
+				}
+				metShieldingChar = false
+			} else if metShieldingChar {
+				return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
 			}
-			metShieldingChar = false
+
+			resultRune = append(resultRune, r)
+			multiplied = false
 		}
-		if metShieldingChar {
-			return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
-		}
-		resultRune = append(resultRune, r)
-		multiplied = false
 	}
 
 	if metShieldingChar {
