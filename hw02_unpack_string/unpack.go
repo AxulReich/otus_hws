@@ -8,8 +8,6 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-const notAddMultiplier int64 = 0
-
 // Unpack checking & building in same loop.
 func Unpack(inStr string) (string, error) {
 	const shieldingChar rune = 92 // stands for '\' character.
@@ -37,7 +35,7 @@ func Unpack(inStr string) (string, error) {
 					mult = int64(r-'0') - 1
 					runeToAdd = resultRune[len(resultRune)-1]
 				} else {
-					return "", fmt.Errorf("digit at [0] position in string or digits in a row waithout \\ err: %w", ErrInvalidString)
+					return "", fmt.Errorf("digit at [0] position in string or digits in a row without \\ err: %w", ErrInvalidString)
 				}
 			}
 		default:
@@ -48,7 +46,7 @@ func Unpack(inStr string) (string, error) {
 					metShieldingChar = false
 				default:
 					metShieldingChar = true
-					mult = notAddMultiplier
+					mult = 0
 				}
 			} else if metShieldingChar {
 				return "", fmt.Errorf("\\ char shield only digits err: %w", ErrInvalidString)
@@ -66,11 +64,10 @@ func add(target []rune, runeToCopy rune, n int64) []rune {
 	switch {
 	case n < 0:
 		target = target[:len(target)-1]
-	case n > 0:
+	case n >= 0:
 		for i := 0; i < int(n); i++ {
 			target = append(target, runeToCopy)
 		}
-	case n == notAddMultiplier:
 	}
 	return target
 }
