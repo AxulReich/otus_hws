@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -47,13 +48,6 @@ func TestTop10(t *testing.T) {
 	t.Run("no words in empty string", func(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
-	t.Run("no words in empty string", func(t *testing.T) {
-		//t.Logf("%#v\n", Top10("  А а\n"))
-		//t.Logf("%#v\n", Top10("---какой-то-- какой-то"))
-		//t.Logf("%#v\n", Top10(""))
-		t.Logf("%#v\n", MyTop10("--нога-- [нога] (нога) нога,,,нога нога Нога НоГа НОГА 'нога' нога,,,нога нога. нога! --нога---"))
-		//t.Logf("%#v\n", Top10("dog,two"))
-	})
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
@@ -68,7 +62,7 @@ func TestTop10(t *testing.T) {
 				"кристофер", // 4
 				"не",        // 4
 			}
-			require.Equal(t, expected, MyTop10(text))
+			require.Equal(t, expected, Top10(text))
 		} else {
 			expected := []string{
 				"он",        // 8
@@ -87,7 +81,7 @@ func TestTop10(t *testing.T) {
 	})
 
 
-	t.Run("", func(t *testing.T) {
-		_ = MyTop10("---какой,-то-- какой-то")
+	t.Run("some cases", func(t *testing.T) {
+		assert.Len(t, Top10("---какой-то-- какой-то какой-то--  ---какой-то"), 1)
 	})
 }
