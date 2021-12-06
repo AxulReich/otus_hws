@@ -45,8 +45,11 @@ var text = `Как видите, он  спускается  по  лестни�
 		В этот вечер...`
 
 func TestTop10(t *testing.T) {
-	t.Run("no words in empty string", func(t *testing.T) {
-		require.Len(t, Top10(""), 0)
+	t.Run("no words in", func(t *testing.T) {
+		cases := []string{"", "\\", "!@", "1", "\\ \\ \\", "!@ 21 3 $54-345", "😀 😀 😀 😀-😀-😀"}
+		for _, tc := range cases {
+			assert.Len(t, Top10(tc), 0)
+		}
 	})
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
@@ -76,12 +79,26 @@ func TestTop10(t *testing.T) {
 				"не",        // 4
 				"то",        // 4
 			}
-			require.Equal(t, expected, Top10(text))
+			assert.Equal(t, expected, Top10(text))
 		}
 	})
 
 
 	t.Run("some cases", func(t *testing.T) {
-		assert.Len(t, Top10("---какой-то-- какой-то какой-то--  ---какой-то"), 1)
+		for _, tc := range []struct {
+			text string
+			expected []string
+		}{
+			{
+				text: "---какой-то-- какой-то какой-то--  ---какой-то",
+				expected: []string{"какой-то"},
+			},
+			{
+				text: "hello!World, -hello!?World",
+				expected: []string{"hello", "world"},
+			},
+		} {
+			assert.Equal(t, tc.expected, Top10(tc.text))
+		}
 	})
 }
