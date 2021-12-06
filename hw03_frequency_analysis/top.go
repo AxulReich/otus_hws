@@ -24,15 +24,14 @@ func Top10(inText string) []string {
 			}
 			return wordToFrequency[arrangedWords[i]] > wordToFrequency[arrangedWords[j]]
 		}
+		trimFunc = func(r rune) bool { return !unicode.IsLetter(r) }
 	)
 
 	scanner.Split(bufio.ScanWords)
 	for scanner.Scan() {
 		token := scanner.Text()
 		for _, word := range regToSplit.Split(token, -1) {
-			word = strings.ToLower(strings.TrimFunc(word, func(r rune) bool {
-				return !unicode.IsLetter(r)
-			}))
+			word = strings.ToLower(strings.TrimFunc(word, trimFunc))
 			if len(word) < 1 {
 				continue
 			}
