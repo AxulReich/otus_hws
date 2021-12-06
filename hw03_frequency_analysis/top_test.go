@@ -1,9 +1,9 @@
 package hw03frequencyanalysis
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,6 +51,7 @@ func TestTop10(t *testing.T) {
 			assert.Len(t, Top10(tc), 0)
 		}
 	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
@@ -83,18 +84,17 @@ func TestTop10(t *testing.T) {
 		}
 	})
 
-
 	t.Run("some cases", func(t *testing.T) {
 		for _, tc := range []struct {
-			text string
+			text     string
 			expected []string
 		}{
 			{
-				text: "---какой-то-- какой-то какой-то--  ---какой-то",
+				text:     "---какой-то-- какой-то какой-то--  ---какой-то",
 				expected: []string{"какой-то"},
 			},
 			{
-				text: "hello!World, -hello!?World",
+				text:     "hello!World, -hello!?World",
 				expected: []string{"hello", "world"},
 			},
 		} {
