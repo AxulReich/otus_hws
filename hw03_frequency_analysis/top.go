@@ -50,4 +50,3 @@ func Top10(inText string) []string {
 	}
 	return arrangedWords[:10]
 }
-
