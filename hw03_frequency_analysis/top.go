@@ -38,16 +38,16 @@ func Top10(inText string) []string {
 			if _, ok := wordToFrequency[word]; !ok {
 				wordToFrequency[word] = 1
 				arrangedWords = append(arrangedWords, word)
-				sort.Slice(arrangedWords, lessFunc)
 				continue
 			}
 			wordToFrequency[word]++
-			sort.Slice(arrangedWords, lessFunc)
 		}
 	}
+	sort.Slice(arrangedWords, lessFunc)
 
 	if len(arrangedWords) < 10 {
 		return arrangedWords
 	}
 	return arrangedWords[:10]
 }
+
