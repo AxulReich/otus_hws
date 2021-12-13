@@ -1,10 +1,10 @@
 package hw03frequencyanalysis
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // Change to true if needed.
@@ -106,7 +106,7 @@ func TestTop10(t *testing.T) {
 		} {
 			res, err := Top10(tc.text)
 			require.NoError(t, err)
-			assert.Equal(t,tc.expected, res)
+			assert.Equal(t, tc.expected, res)
 		}
 	})
 }
