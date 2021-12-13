@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -47,7 +48,9 @@ func TestTop10(t *testing.T) {
 	t.Run("no words in", func(t *testing.T) {
 		cases := []string{"", "\\", "!@", "1", "\\ \\ \\", "!@ 21 3 $54-345", "😀 😀 😀 😀-😀-😀"}
 		for _, tc := range cases {
-			assert.Len(t, Top10(tc), 0)
+			res, err := Top10(tc)
+			require.NoError(t, err)
+			assert.Len(t, res, 0)
 		}
 	})
 
@@ -65,7 +68,9 @@ func TestTop10(t *testing.T) {
 				"кристофер", // 4
 				"не",        // 4
 			}
-			assert.Equal(t, expected, Top10(text))
+			res, err := Top10(text)
+			require.NoError(t, err)
+			assert.Equal(t, expected, res)
 		} else {
 			expected := []string{
 				"он",        // 8
@@ -79,7 +84,9 @@ func TestTop10(t *testing.T) {
 				"не",        // 4
 				"то",        // 4
 			}
-			assert.Equal(t, expected, Top10(text))
+			res, err := Top10(text)
+			require.NoError(t, err)
+			assert.Equal(t, expected, res)
 		}
 	})
 
@@ -97,7 +104,9 @@ func TestTop10(t *testing.T) {
 				expected: []string{"hello", "world"},
 			},
 		} {
-			assert.Equal(t, tc.expected, Top10(tc.text))
+			res, err := Top10(tc.text)
+			require.NoError(t, err)
+			assert.Equal(t,tc.expected, res)
 		}
 	})
 }

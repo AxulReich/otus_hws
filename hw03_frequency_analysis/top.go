@@ -2,13 +2,14 @@ package hw03frequencyanalysis
 
 import (
 	"bufio"
+	"fmt"
 	"regexp"
 	"sort"
 	"strings"
 	"unicode"
 )
 
-func Top10(inText string) []string {
+func Top10(inText string) ([]string, error) {
 	const (
 		splitSet = `[^-\p{L}]+`
 	)
@@ -43,10 +44,13 @@ func Top10(inText string) []string {
 			wordToFrequency[word]++
 		}
 	}
+	if scanner.Err() != nil {
+		return nil, fmt.Errorf("top10 err: %w", scanner.Err())
+	}
 	sort.Slice(arrangedWords, lessFunc)
 
 	if len(arrangedWords) < 10 {
-		return arrangedWords
+		return arrangedWords, nil
 	}
-	return arrangedWords[:10]
+	return arrangedWords[:10], nil
 }
