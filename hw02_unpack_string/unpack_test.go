@@ -2,6 +2,7 @@ package hw02unpackstring
 
 import (
 	"errors"
+	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -39,9 +40,9 @@ func TestUnpack(t *testing.T) {
 	for _, tc := range tests {
 		tc := tc
 		t.Run(tc.input, func(t *testing.T) {
-			result, err := Unpack(tc.input)
+			result, err := MasterUnpack(tc.input)
 			require.NoError(t, err)
-			require.Equal(t, tc.expected, result)
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 }
@@ -52,7 +53,7 @@ func TestUnpackInvalidString(t *testing.T) {
 		tc := tc
 		t.Run(tc, func(t *testing.T) {
 			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+			assert.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
 		})
 	}
 }
