@@ -15,7 +15,7 @@ type List interface {
 	MoveToFront(i *ListItem) error
 }
 
-var EmptyListError = errors.New("empty list")
+var ErrorEmptyList = errors.New("empty list")
 
 type ListItem struct {
 	Value interface{}
@@ -60,7 +60,7 @@ func (l *list) PushFront(v interface{}) *ListItem {
 
 func (l *list) PopFront() (interface{}, error) {
 	if l.head == nil {
-		return nil, fmt.Errorf("PopFront: %w", EmptyListError)
+		return nil, fmt.Errorf("PopFront: %w", ErrorEmptyList)
 	}
 
 	tmp := l.head
@@ -96,7 +96,7 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 func (l *list) PopBack() (interface{}, error) {
 	if l.tail == nil {
-		return nil, fmt.Errorf("PopBack: %w", EmptyListError)
+		return nil, fmt.Errorf("PopBack: %w", ErrorEmptyList)
 	}
 	tmp := l.tail
 	l.tail = l.tail.Prev
@@ -114,7 +114,7 @@ func (l *list) PopBack() (interface{}, error) {
 
 func (l *list) Remove(i *ListItem) error {
 	if l.len == 0 {
-		return fmt.Errorf("remove: %w, val: %v", EmptyListError, i)
+		return fmt.Errorf("remove: %w, val: %v", ErrorEmptyList, i)
 	}
 
 	if l.head == i {
@@ -141,7 +141,7 @@ func (l *list) Remove(i *ListItem) error {
 
 func (l *list) MoveToFront(i *ListItem) error {
 	if l.len == 0 {
-		return EmptyListError
+		return ErrorEmptyList
 	}
 
 	if i == l.head || l.len == 1 {

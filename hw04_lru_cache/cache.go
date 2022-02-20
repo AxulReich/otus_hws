@@ -25,7 +25,7 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	defer l.Unlock()
 
 	if _, ok := l.items[key]; ok {
-		lItem, _ := l.items[key]
+		lItem := l.items[key]
 		item := lItem.Value.(*cacheItem)
 		item.value = value
 		_ = l.queue.MoveToFront(lItem)
@@ -52,7 +52,7 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 	defer l.Unlock()
 
 	if _, ok := l.items[key]; ok {
-		lItem, _ := l.items[key]
+		lItem := l.items[key]
 		_ = l.queue.MoveToFront(lItem)
 		return lItem.Value.(*cacheItem).value, true
 	}

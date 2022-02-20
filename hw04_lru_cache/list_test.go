@@ -36,8 +36,8 @@ func TestList(t *testing.T) {
 			}
 		} // [80, 60, 40, 10, 30, 50, 70]
 		require.Equal(t, 7, l.Len())
-		require.Equal(t, 80, l.Front().Value) //())
-		require.Equal(t, 70, l.Back().Value)  //())
+		require.Equal(t, 80, l.Front().Value) // ())
+		require.Equal(t, 70, l.Back().Value)  // ())
 
 		err = l.MoveToFront(l.Front()) // [80, 60, 40, 10, 30, 50, 70]
 		require.NoError(t, err)
@@ -45,7 +45,7 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 		elems := make([]int, 0, l.Len())
 		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int)) //().(int))
+			elems = append(elems, i.Value.(int)) // ().(int))
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
@@ -63,5 +63,4 @@ func TestList(t *testing.T) {
 		require.NoError(t, err)
 		assert.Same(t, item, l.Front())
 	})
-
 }
