@@ -24,7 +24,7 @@ type ListItem struct {
 }
 
 type list struct {
-	len int
+	len  int
 	head *ListItem
 	tail *ListItem
 }
@@ -164,7 +164,7 @@ func (l *list) String() string {
 	}
 	var (
 		currItem = l.head
-		res = make([]interface{}, 0, l.len)
+		res      = make([]interface{}, 0, l.len)
 	)
 
 	for {

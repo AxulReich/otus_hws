@@ -1,7 +1,6 @@
 package hw04lrucache
 
 import (
-	"go.uber.org/atomic"
 	"sync"
 )
 
@@ -15,9 +14,9 @@ type Cache interface {
 
 type lruCache struct {
 	capacity int
-	atomic.Uint64
+
 	sync.Mutex
-	queue    List
+	queue List
 	items map[Key]*ListItem
 }
 
@@ -26,10 +25,10 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	defer l.Unlock()
 
 	if _, ok := l.items[key]; ok {
-			lItem, _ := l.items[key]
-			item := lItem.Value.(*cacheItem)
-			item.value = value
-			_ = l.queue.MoveToFront(lItem)
+		lItem, _ := l.items[key]
+		item := lItem.Value.(*cacheItem)
+		item.value = value
+		_ = l.queue.MoveToFront(lItem)
 		return true
 	}
 
@@ -59,7 +58,6 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 	}
 	return nil, false
 }
-
 
 func (l *lruCache) Clear() {
 	l.Lock()
