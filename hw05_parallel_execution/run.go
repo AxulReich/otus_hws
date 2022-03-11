@@ -6,6 +6,8 @@ import (
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var ErrEmptyTasks = errors.New("passed empty tasks list")
+var ErrZeroWorkers = errors.New("passed invalid workers number")
 
 type Task func() error
 
@@ -13,6 +15,12 @@ type Task func() error
 func Run(tasks []Task, n, m int) error {
 	if m <= 0 {
 		return ErrErrorsLimitExceeded
+	}
+	if len(tasks) == 0 {
+		return ErrEmptyTasks
+	}
+	if n < 1 {
+		return ErrZeroWorkers
 	}
 
 	var (
@@ -36,7 +44,6 @@ func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 		failedTasksNum int
 		errRes         error
 	)
-	defer close(stopCh)
 
 	for err := range errCh {
 		if err != nil {
@@ -47,6 +54,8 @@ func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 			break
 		}
 	}
+
+	close(stopCh)
 	return errRes
 }
 
@@ -59,13 +68,18 @@ func run(errCh chan error, stopCh chan struct{}, taskCh chan Task, workerNum int
 
 	wg.Add(workerNum)
 	for j := 0; j < workerNum; j++ {
-
 		go func() {
 			defer wg.Done()
 
 			for task := range taskCh {
 			LOOP:
 				for {
+					//select {
+					//case <-stopCh:
+					//	return
+					//default:
+					//}
+
 					select {
 					case errCh <- task():
 						break LOOP
@@ -74,7 +88,6 @@ func run(errCh chan error, stopCh chan struct{}, taskCh chan Task, workerNum int
 					default:
 					}
 				}
-
 			}
 		}()
 	}
