@@ -36,7 +36,8 @@ func Run(tasks []Task, n, m int) error {
 
 	go run(resChan, stopChan, taskChan, n)
 
-	return process(resChan, stopChan, m)
+	err := process(resChan, stopChan, m)
+	return err
 }
 
 func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
@@ -74,11 +75,11 @@ func run(errCh chan error, stopCh chan struct{}, taskCh chan Task, workerNum int
 			for task := range taskCh {
 			LOOP:
 				for {
-					//select {
-					//case <-stopCh:
-					//	return
-					//default:
-					//}
+					select {
+					case <-stopCh:
+						return
+					default:
+					}
 
 					select {
 					case errCh <- task():

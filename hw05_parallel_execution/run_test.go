@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"math/rand"
+	"runtime"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -34,7 +35,7 @@ func TestRun(t *testing.T) {
 		workersCount := 10
 		maxErrorsCount := 23
 		err := Run(tasks, workersCount, maxErrorsCount)
-		
+
 		t.Log("tasksCount: ", tasksCount)
 		t.Log("runTasksCount: ", runTasksCount)
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
@@ -42,6 +43,7 @@ func TestRun(t *testing.T) {
 	})
 
 	t.Run("tasks without errors", func(t *testing.T) {
+		runtime.GOMAXPROCS(1)
 		tasksCount := 50
 		tasks := make([]Task, 0, tasksCount)
 
@@ -59,16 +61,17 @@ func TestRun(t *testing.T) {
 			})
 		}
 
-		workersCount := 5
+		workersCount := 10
 		maxErrorsCount := 1
 
 		start := time.Now()
 		err := Run(tasks, workersCount, maxErrorsCount)
 		elapsedTime := time.Since(start)
 		require.NoError(t, err)
+
 		t.Log("tasksCount: ", tasksCount)
 		t.Log("runTasksCount: ", runTasksCount)
-		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
+		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
 }
