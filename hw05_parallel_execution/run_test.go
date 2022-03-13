@@ -3,12 +3,12 @@ package hw05parallelexecution
 import (
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 )
@@ -72,6 +72,7 @@ func TestRun(t *testing.T) {
 
 func TestRun_Extra(t *testing.T) {
 	defer goleak.VerifyNone(t)
+
 	t.Run("pass invalid parameters", func(t *testing.T) {
 		tasks := []Task{func() error { return nil }}
 
@@ -121,7 +122,7 @@ func TestRun_Extra(t *testing.T) {
 			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				err := Run(tc.tasks, tc.workerNum, tc.maxErrNum)
-				assert.Equal(t, tc.expErr, err)
+				assert.Truef(t, errors.Is(err, tc.expErr), "actual err - %v", err)
 			})
 		}
 	})
@@ -146,6 +147,55 @@ func TestRun_Extra(t *testing.T) {
 		err := Run(tasks, workersCount, maxErrorsCount)
 
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
+		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
+	})
+
+	t.Run("case with maxErrorsCount==len(tasksCount)==maxErrorsCount==1, no task error occurred: expect error", func(t *testing.T) {
+		tasksCount := 1
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		for i := 0; i < tasksCount; i++ {
+			err := fmt.Errorf("error from task %d", i)
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(100))
+			tasks = append(tasks, func() error {
+				time.Sleep(taskSleep)
+				atomic.AddInt32(&runTasksCount, 1)
+				return err
+			})
+		}
+
+		workersCount := 1
+		maxErrorsCount := 1
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
+		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
+	})
+
+	t.Run("case with maxErrorsCount==len(tasksCount)==maxErrorsCount==1, task error occurred: expect no error", func(t *testing.T) {
+		tasksCount := 1
+		tasks := make([]Task, 0, tasksCount)
+
+		var runTasksCount int32
+
+		for i := 0; i < tasksCount; i++ {
+			taskSleep := time.Millisecond * time.Duration(rand.Intn(100))
+			tasks = append(tasks, func() error {
+				time.Sleep(taskSleep)
+				atomic.AddInt32(&runTasksCount, 1)
+				return nil
+			})
+		}
+
+		workersCount := 1
+		maxErrorsCount := 1
+
+		err := Run(tasks, workersCount, maxErrorsCount)
+
+		require.NoError(t, err)
 		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 	})
 }
