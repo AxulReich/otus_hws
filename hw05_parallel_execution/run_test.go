@@ -150,7 +150,7 @@ func TestRun_Extra(t *testing.T) {
 		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 	})
 
-	t.Run("maxErrorsCount==len(tasksCount)==maxErrorsCount==1, no task error occurred: expect error", func(t *testing.T) {
+	t.Run("maxErrorsCount==len(tasksCount)==maxErrorsCount==1, task error occurred: expect error", func(t *testing.T) {
 		tasksCount := 1
 		tasks := make([]Task, 0, tasksCount)
 
@@ -175,7 +175,7 @@ func TestRun_Extra(t *testing.T) {
 		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 	})
 
-	t.Run("maxErrorsCount==len(tasksCount)==maxErrorsCount==1, task error occurred: expect no error", func(t *testing.T) {
+	t.Run("maxErrorsCount==len(tasksCount)==maxErrorsCount==1, no task error occurred: expect no error", func(t *testing.T) {
 		tasksCount := 1
 		tasks := make([]Task, 0, tasksCount)
 
