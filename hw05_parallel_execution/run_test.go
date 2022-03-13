@@ -3,12 +3,12 @@ package hw05parallelexecution
 import (
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"math/rand"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 )
