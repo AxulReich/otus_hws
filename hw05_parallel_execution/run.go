@@ -5,27 +5,28 @@ import (
 	"sync"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
-var ErrEmptyTasks = errors.New("passed empty tasks list")
-var ErrZeroWorkers = errors.New("passed invalid workers number")
+var (
+	ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+	ErrEmptyTasks          = errors.New("passed empty tasks list")
+	ErrZeroWorkers         = errors.New("passed invalid workers number")
+)
 
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
-func Run(tasks []Task, n, m int) error {
-	if m <= 0 {
+func Run(tasks []Task, workerNum, maxErrCount int) error {
+	if maxErrCount <= 0 {
 		return ErrErrorsLimitExceeded
 	}
 	if len(tasks) == 0 {
 		return ErrEmptyTasks
 	}
-	if n < 1 {
+	if workerNum < 1 {
 		return ErrZeroWorkers
 	}
 
 	var (
 		taskChan = make(chan Task, len(tasks))
-		resChan  = make(chan error)
 		stopChan = make(chan struct{})
 	)
 
@@ -34,10 +35,8 @@ func Run(tasks []Task, n, m int) error {
 	}
 	close(taskChan)
 
-	go run(resChan, stopChan, taskChan, n)
-
-	err := process(resChan, stopChan, m)
-	return err
+	resChan := run(stopChan, taskChan, workerNum)
+	return process(resChan, stopChan, maxErrCount)
 }
 
 func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
@@ -60,36 +59,42 @@ func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 	return errRes
 }
 
-func run(errCh chan error, stopCh chan struct{}, taskCh chan Task, workerNum int) {
-	var wg sync.WaitGroup
-	defer func() {
-		wg.Wait()
-		close(errCh)
-	}()
+func run(stopCh chan struct{}, taskCh chan Task, workerNum int) chan error {
+	errCh := make(chan error, workerNum)
 
-	wg.Add(workerNum)
-	for j := 0; j < workerNum; j++ {
-		go func() {
-			defer wg.Done()
+	go func() {
+		var wg sync.WaitGroup
+		defer func() {
+			wg.Wait()
+			close(errCh)
+		}()
 
-			for task := range taskCh {
-			LOOP:
-				for {
-					select {
-					case <-stopCh:
-						return
-					default:
-					}
+		wg.Add(workerNum)
+		for j := 0; j < workerNum; j++ {
+			go func() {
+				defer wg.Done()
 
-					select {
-					case errCh <- task():
-						break LOOP
-					case <-stopCh:
-						return
-					default:
+				for task := range taskCh {
+				LOOP:
+					for {
+						select {
+						case <-stopCh:
+							return
+						default:
+						}
+
+						select {
+						case errCh <- task():
+							break LOOP
+						case <-stopCh:
+							return
+						default:
+						}
 					}
 				}
-			}
-		}()
-	}
+			}()
+		}
+	}()
+
+	return errCh
 }
