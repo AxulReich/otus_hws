@@ -43,12 +43,12 @@ func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 	var (
 		failedTasksNum   int
 		errRes           error
-		isstopChanClosed bool
+		isStopChanClosed bool
 
 		stopChanCheckerCloser = func() {
-			if !isstopChanClosed {
+			if !isStopChanClosed {
 				close(stopCh)
-				isstopChanClosed = true
+				isStopChanClosed = true
 			}
 		}
 	)
