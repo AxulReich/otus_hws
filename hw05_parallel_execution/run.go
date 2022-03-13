@@ -41,21 +41,30 @@ func Run(tasks []Task, workerNum, maxErrCount int) error {
 
 func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 	var (
-		failedTasksNum int
-		errRes         error
+		failedTasksNum   int
+		errRes           error
+		isstopChanClosed bool
+
+		stopChanCheckerCloser = func() {
+			if !isstopChanClosed {
+				close(stopCh)
+				isstopChanClosed = true
+			}
+		}
 	)
 
 	for err := range errCh {
 		if err != nil {
 			failedTasksNum++
 		}
+
 		if failedTasksNum >= maxErrNum {
 			errRes = ErrErrorsLimitExceeded
-			break
+			stopChanCheckerCloser()
 		}
 	}
 
-	close(stopCh)
+	stopChanCheckerCloser()
 	return errRes
 }
 
