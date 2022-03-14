@@ -174,7 +174,7 @@ func TestRun_Extra(t *testing.T) {
 		require.Truef(t, errors.Is(err, ErrErrorsLimitExceeded), "actual err - %v", err)
 		require.Equal(t, int32(tasksCount), runTasksCount, "not all tasks were completed")
 	})
-
+	//nolint:lll
 	t.Run("maxErrorsCount==len(tasksCount)==maxErrorsCount==1, no task error occurred: expect no error", func(t *testing.T) {
 		tasksCount := 1
 		tasks := make([]Task, 0, tasksCount)
