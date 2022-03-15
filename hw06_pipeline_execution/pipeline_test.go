@@ -79,16 +79,17 @@ func TestPipeline(t *testing.T) {
 			close(in)
 		}()
 
-		//result := make([]string, 0, 10)
+		result := make([]string, 0, 10)
 		start := time.Now()
 		for s := range ExecutePipeline(in, done, stages...) {
 			t.Logf("%+v\n", s)
-			//result = append(result, s.(string))
+			result = append(result, s.(string))
 		}
 		elapsed := time.Since(start)
 
-		//require.Len(t, result, 0)
+		require.Len(t, result, 0)
 		t.Logf("%#v\n", elapsed)
-		//require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
+		t.Logf("%#v\n", int64(abortDur)+int64(fault))
+		require.Less(t, int64(elapsed), int64(abortDur)+int64(fault))
 	})
 }
