@@ -29,6 +29,12 @@ func middleWare(in In, done In) Bi {
 			select {
 			case <-done:
 				return
+			default:
+			}
+
+			select {
+			case <-done:
+				return
 			case val, ok := <-in:
 				if ok {
 					out <- val
