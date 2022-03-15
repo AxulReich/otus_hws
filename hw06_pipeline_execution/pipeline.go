@@ -32,6 +32,7 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 
 	return out
 }
+
 func controller(wg *sync.WaitGroup, in In, done In) Bi {
 	out := make(Bi)
 
