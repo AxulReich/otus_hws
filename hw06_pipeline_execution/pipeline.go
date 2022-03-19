@@ -9,7 +9,7 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	var out = in
+	out := in
 
 	for i := range stages {
 		out = stages[i](middleWare(out, done))
@@ -37,7 +37,6 @@ func middleWare(in In, done In) Bi {
 			case val, ok := <-in:
 				if !ok {
 					return
-
 				}
 				out <- val
 			}
