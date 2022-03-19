@@ -9,11 +9,10 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	var out Out
+	var out = in
 
 	for i := range stages {
-		out = stages[i](middleWare(in, done))
-		in = out
+		out = stages[i](middleWare(out, done))
 	}
 
 	return out
@@ -36,11 +35,11 @@ func middleWare(in In, done In) Bi {
 			case <-done:
 				return
 			case val, ok := <-in:
-				if ok {
-					out <- val
-				} else {
+				if !ok {
 					return
+
 				}
+				out <- val
 			}
 		}
 	}()
