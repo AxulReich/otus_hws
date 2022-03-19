@@ -39,7 +39,7 @@ func Run(tasks []Task, workerNum, maxErrCount int) error {
 	return process(resChan, stopChan, maxErrCount)
 }
 
-func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
+func process(errCh <-chan error, stopCh chan struct{}, maxErrNum int) error {
 	var (
 		failedTasksNum   int
 		errRes           error
@@ -68,7 +68,7 @@ func process(errCh chan error, stopCh chan struct{}, maxErrNum int) error {
 	return errRes
 }
 
-func run(stopCh chan struct{}, taskCh chan Task, workerNum int) chan error {
+func run(stopCh chan struct{}, taskCh chan Task, workerNum int) <-chan error {
 	errCh := make(chan error, workerNum)
 
 	go func() {
