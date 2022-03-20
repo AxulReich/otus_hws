@@ -127,7 +127,7 @@ func TestCopy_NegativeCases(t *testing.T) {
 			expError: ErrOffsetNegativeValue,
 		},
 		{
-			name:     "negative offset",
+			name:     "over offset",
 			from:     "testdata/input.txt",
 			offset:   6672,
 			limit:    0,
