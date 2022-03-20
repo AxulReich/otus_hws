@@ -15,7 +15,7 @@ const readOnlyPermission = 0444
 
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
-	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size or file size ")
+	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
 	ErrOffsetNegativeValue   = errors.New("invalid negative offset value")
 )
 
