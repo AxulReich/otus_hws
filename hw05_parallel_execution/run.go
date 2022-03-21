@@ -69,7 +69,7 @@ func process(errCh <-chan error, stopCh chan struct{}, maxErrNum int) error {
 }
 
 func run(stopCh chan struct{}, taskCh chan Task, workerNum int) <-chan error {
-	errCh := make(chan error, workerNum)
+	errCh := make(chan error)
 
 	go func() {
 		var wg sync.WaitGroup
@@ -97,7 +97,6 @@ func run(stopCh chan struct{}, taskCh chan Task, workerNum int) <-chan error {
 							break LOOP
 						case <-stopCh:
 							return
-						default:
 						}
 					}
 				}
