@@ -1,5 +1,10 @@
 package main
 
+import (
+	"io/ioutil"
+	"path/filepath"
+)
+
 type Environment map[string]EnvValue
 
 // EnvValue helps to distinguish between empty files and files with the first empty line.
@@ -11,6 +16,15 @@ type EnvValue struct {
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
-	// Place your code here
+	absPath, err := filepath.Abs(dir)
+	if err != nil {
+		return nil, err
+	}
+	files, err := ioutil.ReadDir(absPath)
+	if err != nil {
+		return nil, err
+	}
+	var result = make(Environment)
+
 	return nil, nil
 }
