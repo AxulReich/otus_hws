@@ -1,8 +1,10 @@
 package main
 
 import (
+	"io/fs"
 	"io/ioutil"
 	"path/filepath"
+	"sync"
 )
 
 type Environment map[string]EnvValue
@@ -24,7 +26,39 @@ func ReadDir(dir string) (Environment, error) {
 	if err != nil {
 		return nil, err
 	}
-	var result = make(Environment)
+
+	var (
+		doneCh = make(chan struct{})
+		fileCh = make(chan fs.FileInfo)
+
+		mu      sync.WaitGroup
+		result  = make(Environment)
+		wg      sync.WaitGroup
+		envScan = func() {
+			defer wg.Done()
+			for file := range fileCh {
+				select {
+				case <-doneCh:
+					return
+				default:
+					if !file.IsDir() && file.Mode().IsRegular() {
+
+					}
+				}
+
+			}
+		}
+	)
+
+	for _, file := range files {
+		if !file.IsDir() && file.Mode().IsRegular() {
+
+		}
+
+	}
 
 	return nil, nil
+}
+
+func envScan(done chan struct{}, data chan fs.FileInfo) {
 }
