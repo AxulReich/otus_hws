@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io/fs"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,8 +14,6 @@ import (
 
 type Environment map[string]EnvValue
 
-const name =
-
 // EnvValue helps to distinguish between empty files and files with the first empty line.
 type EnvValue struct {
 	Value      string
@@ -23,11 +21,17 @@ type EnvValue struct {
 }
 
 type scanData struct {
-	isSuccess bool
-	envName   string
+	envName string
 	EnvValue
 	error
 }
+
+const (
+	cutSet           = " \t"
+	terminalZeroChar = "\x00"
+	newLineChar      = "\n"
+	forbiddenChar    = "="
+)
 
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
@@ -42,73 +46,94 @@ func ReadDir(dir string) (Environment, error) {
 	}
 
 	var (
-		workerNum = runtime.NumCPU()
-		doneCh    = make(chan struct{})
-		fileCh    = make(chan fs.FileInfo)
-		resCh     = make(chan scanData)
-
-		mu     sync.WaitGroup
+		doneCh = make(chan struct{})
+		fileCh = make(chan fs.FileInfo, len(files))
 		result = make(Environment)
-
-		wg sync.WaitGroup
 	)
 
-	wg.Add(workerNum)
-	for i := 0; i < workerNum; i++ {
-		go func() {
-			defer wg.Done()
-			for file := range fileCh {
-				select {
-				case <-doneCh:
-					return
-				default:
-				}
-
-				select {
-				case <-doneCh:
-					return
-				default:
-					if !file.IsDir() && file.Mode().IsRegular() {
-
-					}
-				}
-
-			}
-		}()
-	}
+	resCh := runScan(doneCh, fileCh, absPath)
+	defer close(doneCh)
 
 	for j := range files {
 		fileCh <- files[j]
 	}
+	close(fileCh)
 
-	return nil, nil
+	for res := range resCh {
+		if res.error == nil && res.envName != "" {
+			result[res.envName] = res.EnvValue
+		}
+	}
+
+	return result, nil
 }
 
-func envScan(fileInfo fs.FileInfo, dirPath string) scanData {
+func runScan(doneCh chan struct{}, inCh chan fs.FileInfo, absPath string) <-chan scanData {
+	workerNum := runtime.NumCPU()
+
+	wg := &sync.WaitGroup{}
+	resCh := make(chan scanData)
+
+	go func() {
+		wg.Add(workerNum)
+		for i := 0; i < workerNum; i++ {
+			go func() {
+				defer wg.Done()
+				for {
+					select {
+					case <-doneCh:
+						return
+					default:
+					}
+
+					select {
+					case <-doneCh:
+						return
+					case file, ok := <-inCh:
+						if !ok {
+							return
+						}
+						resCh <- envDirScan(file, absPath)
+					}
+				}
+			}()
+		}
+		wg.Wait()
+		close(resCh)
+	}()
+	return resCh
+}
+
+func envDirScan(fileInfo fs.FileInfo, dirPath string) scanData {
 	var result scanData
 
-	if !fileInfo.IsDir() && fileInfo.Mode().IsRegular() && !strings.Contains(fileInfo.Name(), "=") {
+	if !fileInfo.IsDir() && fileInfo.Mode().IsRegular() && !strings.Contains(fileInfo.Name(), forbiddenChar) {
 		file, err := os.Open(filepath.Join(dirPath, fileInfo.Name()))
-		if err != nil {
-			log.Fatalf("failed opening fileInfo: %s", err)
-		}
 
-		scanner := bufio.NewScanner(file)
-		scanner.Split(bufio.ScanLines)
+		if err == nil {
+			result.envName = fileInfo.Name()
+			scanner := bufio.NewScanner(file)
+			scanner.Split(bufio.ScanLines)
 
-		var (
-			line          string
-			hasSecondLine bool
-			scanCounter   int64
-		)
-
-		for scanner.Scan() {
-			line = scanner.Text()
-
-			if line == "" {
-
+			for scanner.Scan() {
+				result.EnvValue.Value = string(bytes.ReplaceAll(
+					[]byte(strings.TrimRight(scanner.Text(), cutSet)),
+					[]byte(terminalZeroChar),
+					[]byte(newLineChar)),
+				)
+				break
 			}
-		}
 
+			if err = scanner.Err(); err != nil {
+				result.error = err
+			}
+			if fileInfo.Size() == 0 {
+				result.EnvValue.NeedRemove = true
+			}
+
+		} else {
+			result.error = err
+		}
 	}
+	return result
 }
