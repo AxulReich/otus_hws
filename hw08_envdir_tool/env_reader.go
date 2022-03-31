@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -36,13 +37,13 @@ const (
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
-	absPath, err := filepath.Abs(dir)
-	if err != nil {
-		return nil, err
+	if dir == "" || dir == "." {
+		return nil, fmt.Errorf("empty dir: %v", dir)
 	}
-	files, err := ioutil.ReadDir(absPath)
+
+	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ReadDir err: %w", err)
 	}
 
 	var (
@@ -51,7 +52,7 @@ func ReadDir(dir string) (Environment, error) {
 		result = make(Environment)
 	)
 
-	resCh := runScan(doneCh, fileCh, absPath)
+	resCh := runScan(doneCh, fileCh, dir)
 	defer close(doneCh)
 
 	for j := range files {
