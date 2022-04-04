@@ -5,11 +5,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
 	"github.com/stretchr/testify/require"
+	"go.uber.org/goleak"
 )
 
 func TestReadDir_positive(t *testing.T) {
+	defer goleak.VerifyNone(t)
+
 	var expRes1 Environment = map[string]EnvValue{
 		"BAR":              {"bar", false},
 		"EMPTY":            {"ss", false},
@@ -19,6 +21,7 @@ func TestReadDir_positive(t *testing.T) {
 		"lower_case":       {"123", false},
 		"with_digits_0123": {"testdata/env/with_digits_0123", false},
 	}
+
 	for _, tc := range []struct {
 		name   string
 		path   string
@@ -51,6 +54,7 @@ func TestReadDir_positive(t *testing.T) {
 }
 
 func TestReadDir_negative(t *testing.T) {
+	defer goleak.VerifyNone(t)
 	for _, tc := range []struct {
 		name       string
 		path       string
@@ -71,7 +75,13 @@ func TestReadDir_negative(t *testing.T) {
 			path:       "",
 			errContain: "empty dir",
 		},
+		{
+			name:       "pass empty string",
+			path:       "",
+			errContain: "empty dir",
+		},
 	} {
+		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			res, err := ReadDir(tc.path)
 			require.Error(t, err)

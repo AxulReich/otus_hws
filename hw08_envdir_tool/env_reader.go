@@ -52,7 +52,7 @@ func ReadDir(dir string) (Environment, error) {
 		result = make(Environment)
 	)
 
-	resCh := runScan(doneCh, fileCh, dir)
+	resCh := runEnvScan(doneCh, fileCh, dir)
 	defer close(doneCh)
 
 	for j := range files {
@@ -69,14 +69,14 @@ func ReadDir(dir string) (Environment, error) {
 	return result, nil
 }
 
-func runScan(doneCh chan struct{}, inCh chan fs.FileInfo, absPath string) <-chan scanData {
+func runEnvScan(doneCh chan struct{}, inCh chan fs.FileInfo, path string) <-chan scanData {
 	workerNum := runtime.NumCPU()
 
 	wg := &sync.WaitGroup{}
 	resCh := make(chan scanData)
+	wg.Add(workerNum)
 
 	go func() {
-		wg.Add(workerNum)
 		for i := 0; i < workerNum; i++ {
 			go func() {
 				defer wg.Done()
@@ -94,7 +94,7 @@ func runScan(doneCh chan struct{}, inCh chan fs.FileInfo, absPath string) <-chan
 						if !ok {
 							return
 						}
-						resCh <- envDirScan(file, absPath)
+						resCh <- envFileScan(file, path)
 					}
 				}
 			}()
@@ -105,9 +105,10 @@ func runScan(doneCh chan struct{}, inCh chan fs.FileInfo, absPath string) <-chan
 	return resCh
 }
 
-func envDirScan(fileInfo fs.FileInfo, dirPath string) scanData {
+func envFileScan(fileInfo fs.FileInfo, dirPath string) scanData {
 	var result scanData
 
+	// nolint:nestif
 	if !fileInfo.IsDir() && fileInfo.Mode().IsRegular() && !strings.Contains(fileInfo.Name(), forbiddenChar) {
 		file, err := os.Open(filepath.Join(dirPath, fileInfo.Name()))
 
@@ -131,7 +132,6 @@ func envDirScan(fileInfo fs.FileInfo, dirPath string) scanData {
 			if fileInfo.Size() == 0 {
 				result.EnvValue.NeedRemove = true
 			}
-
 		} else {
 			result.error = err
 		}
