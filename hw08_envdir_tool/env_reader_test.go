@@ -11,7 +11,7 @@ import (
 
 func TestReadDir_positive(t *testing.T) {
 	defer goleak.VerifyNone(t)
-
+	//testDir, err := os.CreateTemp()
 	var expRes1 Environment = map[string]EnvValue{
 		"BAR":              {"bar", false},
 		"EMPTY":            {"ss", false},
