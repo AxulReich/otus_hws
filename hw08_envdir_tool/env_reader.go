@@ -38,7 +38,7 @@ const (
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
 	if dir == "" || dir == "." {
-		return nil, fmt.Errorf("empty dir: %v", dir)
+		return nil, fmt.Errorf("empty dir path: %v", dir)
 	}
 
 	files, err := ioutil.ReadDir(dir)
