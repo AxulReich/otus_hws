@@ -21,8 +21,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("can't get environment variables err: %v, passed path: %v", err, path)
 	}
-	// fmt.Printf("AXE env: %#v\n", environment)
-	// fmt.Printf("AXE args: %#v\n", args[2:])
+
 	res, errors := RunCmd(os.Stdin, os.Stdout, args[2:], environment)
 
 	for _, err = range errors {
