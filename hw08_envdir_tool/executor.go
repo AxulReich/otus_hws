@@ -25,14 +25,12 @@ func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []
 		errors = append(errors, fmt.Errorf("RunCmd error: passed cmd: %v is empty or env: %v is nil", cmd, env))
 		returnCode = 1
 	}
-	successEnvSet := true
 
 	for envName, envValue := range env {
 		if envValue.NeedRemove {
 			err := os.Unsetenv(envName)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("can't unset env variabe: %v, err: %v", envName, err))
-				successEnvSet = false
 				returnCode = 1
 			}
 			continue
@@ -41,12 +39,11 @@ func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []
 		err := os.Setenv(envName, envValue.Value)
 		if err != nil {
 			errors = append(errors, fmt.Errorf("can't set env variabe: %v, value: %v, err: %v", envName, envValue.Value, err))
-			successEnvSet = false
 			returnCode = 1
 		}
 	}
 
-	if successEnvSet {
+	if len(errors) == 0 {
 		cmdExec := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
 		cmdExec.Stdin = in
 		cmdExec.Stdout = out
