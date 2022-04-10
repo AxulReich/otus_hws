@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 
-	//"os/exec"
 	exec "golang.org/x/sys/execabs"
 )
 
@@ -30,7 +29,7 @@ func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []
 		if envValue.NeedRemove {
 			err := os.Unsetenv(envName)
 			if err != nil {
-				errors = append(errors, fmt.Errorf("can't unset env variabe: %v, err: %v", envName, err))
+				errors = append(errors, fmt.Errorf("can't unset env variabe: %v, err: %w", envName, err))
 				returnCode = 1
 			}
 			continue
@@ -38,7 +37,7 @@ func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []
 
 		err := os.Setenv(envName, envValue.Value)
 		if err != nil {
-			errors = append(errors, fmt.Errorf("can't set env variabe: %v, value: %v, err: %v", envName, envValue.Value, err))
+			errors = append(errors, fmt.Errorf("can't set env variabe: %v, value: %v, err: %w", envName, envValue.Value, err))
 			returnCode = 1
 		}
 	}
@@ -49,7 +48,7 @@ func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []
 		cmdExec.Stdout = out
 		err := cmdExec.Run()
 		if err != nil {
-			errors = append(errors, fmt.Errorf("can't run: %v, args: %v, err: %v", cmd[0], cmd[1:], err))
+			errors = append(errors, fmt.Errorf("can't run: %v, args: %v, err: %w", cmd[0], cmd[1:], err))
 		}
 		returnCode = cmdExec.ProcessState.ExitCode()
 	}

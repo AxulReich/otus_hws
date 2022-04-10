@@ -15,14 +15,15 @@ func main() {
 
 	path, err := filepath.Abs(args[1])
 	if err != nil {
-		log.Fatalf("can't get absolute path err: %v, passed path: %v", err, args[2])
+		log.Fatalf("can't get absolute path err: %v, passed path: %v", err, args[1])
 	}
 	environment, err := ReadDir(path)
 	if err != nil {
-		log.Fatalf("can't get environment variables err: %v, passed path: %v", err, args[2])
+		log.Fatalf("can't get environment variables err: %v, passed path: %v", err, path)
 	}
-
-	res, errors := RunCmd(os.Stdin, os.Stdout, args[1:], environment)
+	// fmt.Printf("AXE env: %#v\n", environment)
+	// fmt.Printf("AXE args: %#v\n", args[2:])
+	res, errors := RunCmd(os.Stdin, os.Stdout, args[2:], environment)
 
 	for _, err = range errors {
 		fmt.Println(err)

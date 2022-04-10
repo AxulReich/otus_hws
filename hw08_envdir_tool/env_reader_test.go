@@ -68,7 +68,7 @@ func TestReadDir_positive(t *testing.T) {
 
 	var expRes1 Environment = map[string]EnvValue{
 		"BAR":              {"bar", false},
-		"EMPTY":            {"ss", false},
+		"EMPTY":            {"", true},
 		"FOO":              {"   foo\nwith new line", false},
 		"HELLO":            {`"hello"`, false},
 		"UNSET":            {"", true},
