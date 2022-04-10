@@ -2,17 +2,37 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
+
+	//"os/exec"
+	exec "golang.org/x/sys/execabs"
 )
 
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
-func RunCmd(cmd []string, env Environment) (returnCode int) {
+func RunCmd(in io.Reader, out io.Writer, cmd []string, env Environment) (int, []error) {
+	var (
+		returnCode int
+		errors     []error
+	)
+
+	if in == nil || out == nil {
+		errors = append(errors, fmt.Errorf("RunCmd error: passed in:%v or out:%v is nil", in, out))
+		returnCode = 1
+	}
+
+	if len(cmd) < 1 || env == nil {
+		errors = append(errors, fmt.Errorf("RunCmd error: passed cmd: %v is empty or env: %v is nil", cmd, env))
+		returnCode = 1
+	}
+	successEnvSet := true
+
 	for envName, envValue := range env {
 		if envValue.NeedRemove {
 			err := os.Unsetenv(envName)
 			if err != nil {
-				fmt.Printf("can't unset env variabe: %v, err: %v", envName, err)
+				errors = append(errors, fmt.Errorf("can't unset env variabe: %v, err: %v", envName, err))
+				successEnvSet = false
 				returnCode = 1
 			}
 			continue
@@ -20,21 +40,22 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 		err := os.Setenv(envName, envValue.Value)
 		if err != nil {
-			fmt.Printf("can't set env variabe: %v, value: %v, err: %v", envName, envValue.Value, err)
+			errors = append(errors, fmt.Errorf("can't set env variabe: %v, value: %v, err: %v", envName, envValue.Value, err))
+			successEnvSet = false
 			returnCode = 1
 		}
 	}
 
-	if returnCode == 0 {
-		cmdExec := exec.Command(cmd[0], cmd[1:]...) // nolint:gosec
-		cmdExec.Stdin = os.Stdin
-		cmdExec.Stdout = os.Stdout
+	if successEnvSet {
+		cmdExec := exec.Command(cmd[0], cmd[1:]...) //nolint:gosec
+		cmdExec.Stdin = in
+		cmdExec.Stdout = out
 		err := cmdExec.Run()
 		if err != nil {
-			fmt.Printf("can't run: %v, args: %v, err: %v", cmd[0], cmd[1:], err)
+			errors = append(errors, fmt.Errorf("can't run: %v, args: %v, err: %v", cmd[0], cmd[1:], err))
 		}
 		returnCode = cmdExec.ProcessState.ExitCode()
 	}
 
-	return
+	return returnCode, errors
 }

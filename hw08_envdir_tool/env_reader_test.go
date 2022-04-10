@@ -12,28 +12,34 @@ import (
 	"go.uber.org/goleak"
 )
 
+const (
+	rootPath         = "testdata/env"
+	fileNameToCopy   = "BAR"
+	dirNameDupl      = "dir_with_dupl"
+	emptyDirName     = "empty_dir"
+	invalidNameFile  = "INVALID=FILE=NAME"
+	lowCaseFileName  = "lower_case"
+	lowCaseFileValue = "123"
+	withDigFileName  = "with_digits_0123"
+)
+
 func closeFileAndDelete(t *testing.T, file *os.File) {
 	t.Helper()
+
 	_ = file.Close()
 	_ = os.Remove(file.Name())
 }
 
 func TestReadDir_positive(t *testing.T) {
 	defer goleak.VerifyNone(t)
-	const (
-		rootPath        = "testdata/env"
-		fileNameToCopy  = "BAR"
-		dirNameDupl     = "dir_with_dupl"
-		emptyDirName    = "empty_dir"
-		invalidNameFile = "INVALID=FILE=NAME"
-		lowCaseFileName = "lower_case"
-		withDigFileName = "with_digits_0123"
-	)
 
 	invalidFile, err := os.Create(filepath.Join(rootPath, invalidNameFile))
 	require.NoError(t, err)
 	defer closeFileAndDelete(t, invalidFile)
 	lowCaseFile, err := os.Create(filepath.Join(rootPath, lowCaseFileName))
+	require.NoError(t, err)
+	nBytes, err := lowCaseFile.Write([]byte(lowCaseFileValue))
+	require.NotZero(t, nBytes)
 	require.NoError(t, err)
 	defer closeFileAndDelete(t, lowCaseFile)
 	withDigFile, err := os.Create(filepath.Join(rootPath, withDigFileName))
@@ -46,16 +52,15 @@ func TestReadDir_positive(t *testing.T) {
 	require.NoError(t, err)
 	source, err := os.Open(filepath.Join(rootPath, fileNameToCopy))
 	require.NoError(t, err)
-	nBytes, err := io.Copy(duplFile, source)
+	nBytesCopy, err := io.Copy(duplFile, source)
 	require.NoError(t, err)
-	require.NotZero(t, nBytes)
+	require.NotZero(t, nBytesCopy)
 	emptyDir, err := os.MkdirTemp(rootPath, emptyDirName)
 	require.NoError(t, err)
 
 	defer func() {
 		_ = source.Close()
 		_ = duplFile.Close()
-		_ = os.Remove(source.Name())
 		_ = os.Remove(duplFile.Name())
 		_ = os.Remove(duplDir)
 		_ = os.Remove(emptyDir)
@@ -67,8 +72,8 @@ func TestReadDir_positive(t *testing.T) {
 		"FOO":              {"   foo\nwith new line", false},
 		"HELLO":            {`"hello"`, false},
 		"UNSET":            {"", true},
-		"lower_case":       {"123", false},
-		"with_digits_0123": {"testdata/env/with_digits_0123", false},
+		"lower_case":       {lowCaseFileValue, false},
+		"with_digits_0123": {"", true},
 	}
 
 	for _, tc := range []struct {
@@ -89,7 +94,7 @@ func TestReadDir_positive(t *testing.T) {
 		},
 		{
 			name:   "pass empty dir",
-			path:   "testdata/env/empty_dir",
+			path:   emptyDir,
 			expRes: make(Environment),
 		},
 	} {
