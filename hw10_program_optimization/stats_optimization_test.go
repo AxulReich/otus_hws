@@ -1,3 +1,4 @@
+//go:build bench
 // +build bench
 
 package hw10programoptimization
@@ -17,6 +18,12 @@ const (
 	timeLimit = 300 * time.Millisecond
 )
 
+//    stats_optimization_test.go:46: time used: 171.744959ms / 300ms
+//    stats_optimization_test.go:47: memory used: 15Mb / 30Mb
+
+//    stats_optimization_test.go:49: time used: 506.839292ms / 300ms
+//    stats_optimization_test.go:50: memory used: 294Mb / 30Mb
+
 // go test -v -count=1 -timeout=30s -tags bench .
 func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 	bench := func(b *testing.B) {
@@ -33,7 +40,7 @@ func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 		require.NoError(t, err)
 
 		b.StartTimer()
-		stat, err := GetDomainStat(data, "biz")
+		stat, err := GetDomainStatOptimised(data, "biz")
 		b.StopTimer()
 		require.NoError(t, err)
 
@@ -48,6 +55,28 @@ func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 	require.Less(t, int64(result.T), int64(timeLimit), "the program is too slow")
 	require.Less(t, mem, memoryLimit, "the program is too greedy")
 }
+
+//func BenchmarkGetDomainStatOptimised(b *testing.B) {
+//	r, _ := zip.OpenReader("testdata/users.dat.zip")
+//	defer r.Close()
+//
+//	data, _ := r.File[0].Open()
+//
+//	for i := 0; i < b.N; i++ {
+//		_, _ := GetDomainStatOptimised(data, "biz")
+//	}
+//}
+//
+//func BenchmarkGetDomainStat(b *testing.B) {
+//	r, _ := zip.OpenReader("testdata/users.dat.zip")
+//	defer r.Close()
+//
+//	data, _ := r.File[0].Open()
+//
+//	for i := 0; i < b.N; i++ {
+//		_, _ := GetDomainStat(data, "biz")
+//	}
+//}
 
 var expectedBizStat = DomainStat{
 	"abata.biz":         25,
