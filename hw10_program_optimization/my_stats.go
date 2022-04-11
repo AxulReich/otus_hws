@@ -4,12 +4,28 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
+const (
+	maxDomainLength  = 63
+	forbiddenCharSet = `[\W]+`
+)
+
 func GetDomainStatOptimised(r io.Reader, domain string) (DomainStat, error) {
+	if r == nil {
+		return nil, fmt.Errorf("error: nil passed as r")
+	}
+
+	reg := regexp.MustCompile(forbiddenCharSet)
+
+	if reg.MatchString(domain) || domain == "" || len(domain) > maxDomainLength {
+		return nil, fmt.Errorf("error: invalid domain: %v", domain)
+	}
+
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 

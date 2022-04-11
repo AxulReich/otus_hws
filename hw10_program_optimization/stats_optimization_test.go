@@ -18,9 +18,11 @@ const (
 	timeLimit = 300 * time.Millisecond
 )
 
-//    stats_optimization_test.go:46: time used: 171.744959ms / 300ms
-//    stats_optimization_test.go:47: memory used: 15Mb / 30Mb
+//    GetDomainStatOptimised result:
+//    stats_optimization_test.go:52: time used: 166.912083ms / 300ms
+//    stats_optimization_test.go:53: memory used: 15Mb / 30Mb
 
+//    GetDomainStat result:
 //    stats_optimization_test.go:49: time used: 506.839292ms / 300ms
 //    stats_optimization_test.go:50: memory used: 294Mb / 30Mb
 
