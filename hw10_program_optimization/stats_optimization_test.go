@@ -58,28 +58,6 @@ func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 	require.Less(t, mem, memoryLimit, "the program is too greedy")
 }
 
-//func BenchmarkGetDomainStatOptimised(b *testing.B) {
-//	r, _ := zip.OpenReader("testdata/users.dat.zip")
-//	defer r.Close()
-//
-//	data, _ := r.File[0].Open()
-//
-//	for i := 0; i < b.N; i++ {
-//		_, _ := GetDomainStatOptimised(data, "biz")
-//	}
-//}
-//
-//func BenchmarkGetDomainStat(b *testing.B) {
-//	r, _ := zip.OpenReader("testdata/users.dat.zip")
-//	defer r.Close()
-//
-//	data, _ := r.File[0].Open()
-//
-//	for i := 0; i < b.N; i++ {
-//		_, _ := GetDomainStat(data, "biz")
-//	}
-//}
-
 var expectedBizStat = DomainStat{
 	"abata.biz":         25,
 	"abatz.biz":         25,
