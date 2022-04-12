@@ -11,7 +11,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 )
 
-const readOnlyPermission = 0444
+const readOnlyPermission = 0o444
 
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")

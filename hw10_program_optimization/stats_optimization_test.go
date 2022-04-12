@@ -1,3 +1,4 @@
+//go:build bench
 // +build bench
 
 package hw10programoptimization
@@ -17,6 +18,14 @@ const (
 	timeLimit = 300 * time.Millisecond
 )
 
+//    GetDomainStatOptimised result:
+//    stats_optimization_test.go:52: time used: 166.912083ms / 300ms
+//    stats_optimization_test.go:53: memory used: 15Mb / 30Mb
+
+//    GetDomainStat result:
+//    stats_optimization_test.go:49: time used: 506.839292ms / 300ms
+//    stats_optimization_test.go:50: memory used: 294Mb / 30Mb
+
 // go test -v -count=1 -timeout=30s -tags bench .
 func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 	bench := func(b *testing.B) {
@@ -33,7 +42,7 @@ func TestGetDomainStat_Time_And_Memory(t *testing.T) {
 		require.NoError(t, err)
 
 		b.StartTimer()
-		stat, err := GetDomainStat(data, "biz")
+		stat, err := GetDomainStatOptimised(data, "biz")
 		b.StopTimer()
 		require.NoError(t, err)
 
