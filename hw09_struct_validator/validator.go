@@ -2,6 +2,7 @@ package hw09structvalidator
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -11,6 +12,8 @@ type ValidationError struct {
 }
 
 type ValidationErrors []ValidationError
+
+// var NotStructError = errors.New("not struct passed")
 
 func (v ValidationErrors) Error() string {
 	s := strings.Builder{}
@@ -23,10 +26,9 @@ func (v ValidationErrors) Error() string {
 }
 
 func Validate(v interface{}) error {
-	if ref
-	switch v.(type) {
-	case :
-
+	rv := reflect.ValueOf(v)
+	if rv.Kind() != reflect.Struct {
+		return fmt.Errorf("expect struct, but recieved: %T", v)
 	}
 	// Place your code here.
 	return nil
