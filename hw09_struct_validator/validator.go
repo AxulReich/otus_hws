@@ -105,7 +105,7 @@ func validateField(validationRules string, val reflect.Value) error {
 		ruleValue := strings.Split(tag, tagNameSep)[1]
 		rules[ruleName] = ruleValue
 	}
-
+	// nolint:exhaustive
 	switch val.Kind() {
 	case reflect.Int:
 		err := validateIntField(rules, []int64{val.Int()})
@@ -136,6 +136,8 @@ func validateField(validationRules string, val reflect.Value) error {
 			if err := validateIntField(rules, value); err != nil {
 				return err
 			}
+		default:
+			return ErrUnsupportedType
 		}
 	default:
 		return ErrUnsupportedType

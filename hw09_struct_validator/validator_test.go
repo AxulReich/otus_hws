@@ -42,6 +42,7 @@ type (
 		Val2 int     `validate:"min:a"`
 		Val3 string  `validate:"int:one,two"`
 		Val4 float64 `validate:"max:10"`
+		Val5 [][]int `validate:"max:10"`
 	}
 )
 
@@ -182,6 +183,10 @@ func TestValidate(t *testing.T) {
 				},
 				ValidationError{
 					Field: "Val4",
+					Err:   ErrUnsupportedType,
+				},
+				ValidationError{
+					Field: "Val5",
 					Err:   ErrUnsupportedType,
 				},
 			},
