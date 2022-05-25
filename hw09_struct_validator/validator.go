@@ -7,7 +7,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 )
 
 const (
@@ -158,7 +157,7 @@ func validateStringField(rules validateRules, value []string) error {
 				if err != nil {
 					return ErrCastRuleValue
 				}
-				if utf8.RuneCountInString(v) != mustLen {
+				if len([]rune(v)) != mustLen {
 					return ErrInvalidStringLength
 				}
 			case stringRuleReg:
