@@ -1,3 +1,4 @@
+//nolint:typecheck
 package main
 
 import (
@@ -29,7 +30,6 @@ const (
 	hostRegexp     = `\blocalhost\b|\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b`
 )
 
-//nolint:typecheck
 func main() {
 	address, timeout, err := parseParams()
 	if err != nil {
