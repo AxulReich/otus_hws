@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -16,11 +16,11 @@ type TelnetClient interface {
 }
 
 type Client struct {
-	address    string
-	timeout    time.Duration
-	in         io.ReadCloser
-	out        io.Writer
-	connection net.Conn
+	address string
+	timeout time.Duration
+	in      io.ReadCloser
+	out     io.Writer
+	conn    net.Conn
 }
 
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
@@ -34,70 +34,56 @@ func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, ou
 
 func (c *Client) Connect() error {
 	var err error
-	c.connection, err = net.DialTimeout("tcp", c.address, c.timeout)
+	c.conn, err = net.DialTimeout("tcp", c.address, c.timeout)
 	if err != nil {
-		return err
+		return fmt.Errorf("connect err: %w", err)
 	}
 	log.Printf("...Connected to %s", c.address)
 	return nil
 }
 
-func (c *Client) Close() (err error) {
-	if err = c.in.Close(); err != nil {
-		return
+func (c *Client) Close() error {
+	if c.conn == nil {
+		return fmt.Errorf("connection is nil")
 	}
-	err = c.connection.Close()
-	return
-}
+	if c.in == nil {
+		return fmt.Errorf("telnet in is nil")
+	}
 
-func (c *Client) Send() (err error) {
-	err = c.readWrite(c.in, c.connection)
-	return
-}
+	if err := c.in.Close(); err != nil {
+		return fmt.Errorf("in io.ReadCloser close err: %w", err)
+	}
 
-func (c *Client) Receive() (err error) {
-	err = c.readWrite(c.connection, c.out)
-	return
-}
-
-func (c *Client) readWrite(rd io.Reader, wr io.Writer) (err error) {
-	if err = copyWithEOF(wr, rd); err != nil {
-		if errors.Is(err, io.EOF) {
-			log.Printf("...EOF")
-			return nil
-		}
-		log.Printf("...Connection was closed by peer")
-		return err
+	if err := c.conn.Close(); err != nil {
+		return fmt.Errorf("connection close err: %w", err)
 	}
 	return nil
 }
 
-func copyWithEOF(dst io.Writer, src io.Reader) (err error) {
-	size := 32 * 1024
-	buf := make([]byte, size)
-	for {
-		nr, er := src.Read(buf)
-		if nr > 0 { //nolint
-			nw, ew := dst.Write(buf[0:nr])
-			if nw < 0 || nr < nw {
-				nw = 0
-				if ew == nil {
-					ew = errors.New("invalid write result")
-				}
-			}
-			if ew != nil {
-				err = ew
-				break
-			}
-			if nr != nw {
-				err = io.ErrShortWrite
-				break
-			}
-		}
-		if er != nil {
-			err = er
-			break
-		}
+func (c *Client) Send() error {
+	if c.conn == nil {
+		return fmt.Errorf("connection is nil")
 	}
-	return err
+	if c.in == nil {
+		return fmt.Errorf("telnet in is nil")
+	}
+
+	if _, err := io.Copy(c.conn, c.in); err != nil {
+		return fmt.Errorf("send err: %w", err)
+	}
+	return nil
+}
+
+func (c *Client) Receive() error {
+	if c.conn == nil {
+		return fmt.Errorf("connection is nil")
+	}
+	if c.out == nil {
+		return fmt.Errorf("telnet out is nil")
+	}
+
+	if _, err := io.Copy(c.out, c.conn); err != nil {
+		return fmt.Errorf("recieve err: %w", err)
+	}
+	return nil
 }
