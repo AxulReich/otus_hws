@@ -26,7 +26,7 @@ const (
 	maxPortValue   = 65535
 	minPortValue   = 1
 	defaultTimeout = 10 * time.Second
-	hostRegexp     = `\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b`
+	hostRegexp     = `\blocalhost\b|\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b`
 )
 
 func main() {
@@ -49,8 +49,8 @@ func main() {
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 
-	go run(cancelFunc, telnet.Send)
 	go run(cancelFunc, telnet.Receive)
+	go run(cancelFunc, telnet.Send)
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, os.Interrupt)
