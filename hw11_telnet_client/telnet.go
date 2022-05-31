@@ -83,7 +83,7 @@ func (c *Client) Receive() error {
 	}
 
 	if _, err := io.Copy(c.out, c.conn); err != nil {
-		return fmt.Errorf("recieve err: %w", err)
+		return fmt.Errorf("receive err: %w", err)
 	}
 	return nil
 }

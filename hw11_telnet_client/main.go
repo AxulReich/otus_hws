@@ -7,19 +7,27 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/spf13/pflag"
 )
 
+var reg *regexp.Regexp
+
+type telnetFunc = func() error
+
+func init() {
+	reg = regexp.MustCompile(hostRegexp)
+}
+
 const (
 	maxPortValue   = 65535
 	minPortValue   = 1
 	defaultTimeout = 10 * time.Second
+	hostRegexp     = `\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4}\b`
 )
-
-type telnetFunc = func() error
 
 func main() {
 	address, timeout, err := parseParams()
@@ -31,10 +39,11 @@ func main() {
 	if err = telnet.Connect(); err != nil {
 		log.Fatal(err)
 	}
+
 	defer func() {
 		err := telnet.Close()
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}()
 
@@ -60,7 +69,7 @@ func run(cancelFunc context.CancelFunc, tlFunc telnetFunc) {
 	if err != nil {
 		_, err = fmt.Fprintln(os.Stderr, err)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 	}
 }
@@ -71,14 +80,18 @@ func parseParams() (address string, timeout *time.Duration, err error) {
 
 	args := pflag.CommandLine.Args()
 	if len(args) != 2 {
-		log.Fatal("you must pass host & port")
+		return "", nil, fmt.Errorf("you must pass host & port")
 	}
 
 	host := args[0]
 	port := args[1]
 
+	if ok := reg.MatchString(host); !ok {
+		return "", nil, fmt.Errorf("invalid host")
+	}
+
 	if i, err := strconv.Atoi(port); err != nil || i < minPortValue || i > maxPortValue {
-		log.Fatal("invalid port")
+		return "", nil, fmt.Errorf("invalid port")
 	}
 	return net.JoinHostPort(host, port), timeout, nil
 }
